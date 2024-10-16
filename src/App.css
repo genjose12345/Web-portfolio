@@ -1,0 +1,147 @@
+.app {
+  text-align: center;
+  background-color: rgb(0, 0, 0);
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-section {
+  color: white;
+  padding: 2rem 0;
+  padding-bottom: 100px;
+}
+
+.hero-name {
+  font-size: 80px;
+}
+
+.hero-job {
+  font-size: 100px;
+  color: yellow;
+}
+
+.hero-description {
+  margin-left: 10rem;
+  text-align: left;
+  font-size: 20px;
+}
+
+.about-section {
+  background-color: whitesmoke;
+  padding: 4rem 0;
+  padding-bottom: 400px;
+}
+
+.about-section h1 {
+  margin-top: 2rem;
+  margin-left: 800px;
+  max-width: 200px;
+}
+
+.about-section p {
+  text-align: left;
+  margin-left: 600px;
+  max-width: 600px;
+}
+
+.skill-section {
+  background-color: white;
+}
+
+.skill-title {
+  font-size: 20px;
+}
+
+.skills-container {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.skills-column {
+  width: 45%;
+}
+
+.skill-item {
+  margin-bottom: 20px;
+}
+
+.skill-item p {
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.container {
+  background-color: rgb(192, 192, 192);
+  width: 100%;
+  border-radius: 10px;
+}
+
+.skill {
+  background-color: green;
+  color: white;
+  padding: 1%;
+  text-align: right;
+  font-size: 20px;
+  border-radius: 15px;
+}
+
+.java {
+  width: 80%;
+}
+
+.matlab {
+  width: 60%;
+}
+
+.r {
+  width: 60%;
+}
+
+.html {
+  width: 50%;
+}
+
+.css {
+  width: 50%;
+}
+
+.javascript {
+  width: 50%;
+}
+
+.projects-section {
+  background-color: whitesmoke;
+  padding: 4rem 0;
+  padding-bottom: 90px;
+}
+
+.projects-title h1 {
+  text-align: center;
+  margin-top: 2rem;
+  color: black;
+}
+
+.contact-section {
+  margin-top: 5rem;
+  color: white;
+  padding-bottom: 2rem;
+}
+
+.contact-links {
+  text-align: center;
+}
+
+.contact-links a {
+  color: white;
+}
+
+/* You may need to adjust these styles based on your existing Card component styles */
+.card {
+  margin-left: 0;
+  margin-right: auto;
+}
