@@ -11,59 +11,80 @@
 .hero-section {
   color: white;
   padding: 2rem 0;
-  padding-bottom: 100px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .hero-name {
-  font-size: 80px;
+  font-size: clamp(40px, 5vw, 80px);
 }
 
 .hero-job {
-  font-size: 100px;
+  font-size: clamp(60px, 6vw, 100px);
   color: yellow;
 }
 
 .hero-description {
-  margin-left: 10rem;
-  text-align: left;
-  font-size: 20px;
+  font-size: clamp(16px, 2vw, 24px);
+  max-width: 80%;
+  margin: 2rem auto;
+  text-align: center;
 }
 
 .about-section {
   background-color: whitesmoke;
   padding: 4rem 0;
-  padding-bottom: 400px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+}
+
+.about-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  position: relative;
+  bottom: 200px;
 }
 
 .about-section h1 {
-  margin-top: 2rem;
-  margin-left: 800px;
-  max-width: 200px;
+  text-align: left;
+  margin-bottom: 2rem;
+  margin-left: 20rem;
+
 }
 
 .about-section p {
   text-align: left;
-  margin-left: 600px;
-  max-width: 600px;
+  margin-bottom: 1rem;
 }
 
 .skill-section {
   background-color: white;
+  padding: 4rem 0;
 }
 
 .skill-title {
   font-size: 20px;
+  margin-bottom: 2rem;
 }
 
 .skills-container {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content: space-around;
   margin: 0 auto;
   max-width: 1200px;
 }
 
 .skills-column {
-  width: 45%;
+  width: 100%;
+  padding: 0 1rem;
 }
 
 .skill-item {
@@ -88,60 +109,95 @@
   text-align: right;
   font-size: 20px;
   border-radius: 15px;
+  width: 0;
+  transition: width 1s ease-out;
+}
+
+.skill.animate {
+  width: var(--skill-percentage);
 }
 
 .java {
-  width: 80%;
+  --skill-percentage: 80%;
 }
 
 .matlab {
-  width: 60%;
+  --skill-percentage: 60%;
 }
 
 .r {
-  width: 60%;
+  --skill-percentage: 60%;
 }
 
 .html {
-  width: 50%;
+  --skill-percentage: 50%;
 }
 
 .css {
-  width: 50%;
+  --skill-percentage: 50%;
 }
 
 .javascript {
-  width: 50%;
+  --skill-percentage: 50%;
 }
 
 .projects-section {
   background-color: whitesmoke;
   padding: 4rem 0;
-  padding-bottom: 90px;
 }
 
 .projects-title h1 {
   text-align: center;
-  margin-top: 2rem;
-  color: black;
+  margin-bottom: 2rem;
 }
 
 .contact-section {
-  margin-top: 5rem;
+  background-color: black;
   color: white;
-  padding-bottom: 2rem;
+  padding: 4rem 0;
+}
+
+.contact-section h1 {
+  text-align: left;
+  position: relative;
+  bottom: 80px;
 }
 
 .contact-links {
-  text-align: center;
+  text-align: left;
+  margin-left: 10px;
+  position: relative;
+  bottom: 80px;
+  width: 500px;
+  font-size: 20px;
+
 }
 
 .contact-links a {
   color: white;
+
 }
 
-/* You may need to adjust these styles based on your existing Card component styles */
-.card {
-  margin-left: 0;
-  margin-right: auto;
+@media (min-width: 768px) {
+  .about-content {
+    width: 70%;
+    margin-left: auto;
+    margin-right: 0;
+  }
+
+  .skills-column {
+    width: 45%;
+  }
+}
+
+@media (max-width: 767px) {
+
+  .about-section h1,
+  .about-section p {
+    text-align: center;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
 }
