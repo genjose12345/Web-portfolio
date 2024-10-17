@@ -13,6 +13,17 @@
     text-decoration: none;
 }
 
+.navbar-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+.navbar-center i {
+    margin-right: 0.5rem;
+}
+
 .navbar-links {
     display: flex;
     list-style: none;

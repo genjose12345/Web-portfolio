@@ -36,10 +36,9 @@ function App() {
         <section id="about" className="about-section">
           <div className="about-content">
             <h1><u>About Me</u></h1>
-            <p>Education: Associates of Science in Computer Science, Bachelor of Science in Computer Science</p>
-            <p>Where: Dalton State College, Kennesaw State University</p>
+            <p>Education:Dalton State College Associates of Science in Computer Science, Kennesaw State University Bachelor of Science in Computer Science</p>
             <p>Goals: getting my Master's and PHD</p>
-            <p>Who am I? I'm a first generation college student looking to make change in the world with the advancements of technology</p>
+            <p>Who am I? I'm a first generation college student looking to make change in the world with the advancements of technology.Some of my hobbie include working out and learning new programming languages</p>
           </div>
         </section>
         <section id="skills" className="skill-section">
@@ -52,19 +51,19 @@ function App() {
               <div className="skill-item">
                 <p>JAVA</p>
                 <div className="container">
-                  <div className="skill java">80%</div>
+                  <div className="skill java"></div>
                 </div>
               </div>
               <div className="skill-item">
                 <p>MATLAB</p>
                 <div className="container">
-                  <div className="skill matlab">60%</div>
+                  <div className="skill matlab"></div>
                 </div>
               </div>
               <div className="skill-item">
                 <p>R</p>
                 <div className="container">
-                  <div className="skill r">60%</div>
+                  <div className="skill r"></div>
                 </div>
               </div>
             </div>
@@ -72,19 +71,19 @@ function App() {
               <div className="skill-item">
                 <p>HTML</p>
                 <div className="container">
-                  <div className="skill html">50%</div>
+                  <div className="skill html"></div>
                 </div>
               </div>
               <div className="skill-item">
                 <p>CSS</p>
                 <div className="container">
-                  <div className="skill css">50%</div>
+                  <div className="skill css"></div>
                 </div>
               </div>
               <div className="skill-item">
                 <p>JAVASCRIPT</p>
                 <div className="container">
-                  <div className="skill javascript">50%</div>
+                  <div className="skill javascript"></div>
                 </div>
               </div>
             </div>
