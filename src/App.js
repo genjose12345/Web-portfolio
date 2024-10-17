@@ -3,6 +3,8 @@ import './App.css';
 import NavBar from './components/NavBar';
 import CardComponents from './components/Cardcomponents';
 import { initSkillsAnimation } from './SkillsAnimation';
+import ScrollButton from './components/ScrollButton';  // Import the ScrollButton component
+
 //https://demo.wpoperation.com/arrival-me/
 function App() {
   useEffect(() => {
@@ -24,7 +26,6 @@ function App() {
   return (
     <div className="app">
       <header className="header">
-
         <NavBar />
       </header>
       <main className="main-content">
@@ -44,7 +45,6 @@ function App() {
         <section id="skills" className="skill-section">
           <div className="skill-title">
             <h1>My Skills</h1>
-            <p>a list of some of my skills</p>
           </div>
           <div className="skills-container">
             <div className="skills-column">
@@ -109,6 +109,7 @@ function App() {
           </div>
         </section>
       </main>
+      <ScrollButton />
     </div>
   );
 }
