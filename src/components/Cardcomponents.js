@@ -1,7 +1,7 @@
 import React from 'react';
 import Card from './Card';
 import './Cardcomponents.css';
-import test1 from './test.jpg';
+import login from './image.png';
 import graphs from './graphs.jpg';
 import cyber from './cyber_research.jpg';
 
@@ -11,7 +11,7 @@ const CardComponents = () => {
             id: 1,
             title: "Chess tournament",
             content: "This project is about creating a chess tournament system That schools can use to auto generate matches along with add remove  players and view the tournament standings.",
-            image: test1
+            image: login
         },
         {
             id: 2,
