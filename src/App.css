@@ -76,9 +76,8 @@ body {
 }
 
 .about-section h1 {
-  text-align: left;
+  text-align: center;
   margin-bottom: 2rem;
-  margin-left: 16rem;
   font-size: clamp(24px, 4vw, 36px);
 }
 
