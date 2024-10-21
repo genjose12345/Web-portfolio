@@ -15,8 +15,8 @@ const CardComponents = () => {
         },
         {
             id: 2,
-            title: "Deep learning AI",
-            content: "This project I used deep learning to detect diabetic retinophaty that can be found in the eyes.",
+            title: "Transfer Learning AI",
+            content: "In this project I used Transfer Learning to detect diabetic retinophaty that can be found in the eyes.",
             image: graphs
         },
         {
