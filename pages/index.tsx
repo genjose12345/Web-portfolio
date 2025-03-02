@@ -1134,7 +1134,7 @@ class CurriculumLoss(nn.Module):
                 <span className="px-3 py-1 bg-gray-800 bg-opacity-50 rounded-full text-sm tech-tag">
                   {blogModalData.category}
                 </span>
-                <span className="text-gray-300 text-sm flex items-center tech-tag" style={{ '--tag-index': 1 }}>
+                <span className="text-gray-300 text-sm flex items-center tech-tag" style={{ '--tag-index': '1' } as React.CSSProperties}>
                   <Calendar size={16} className="mr-1" />
                   {blogModalData.date}
                 </span>
