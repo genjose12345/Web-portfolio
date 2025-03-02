@@ -1,0 +1,1268 @@
+import React, { useState, useEffect } from 'react';
+import { Github, Linkedin, Mail, ChevronDown, Award, Code, Database, Server, Cpu, ArrowRight, ExternalLink, X } from 'lucide-react';
+import AIChatBox from './AIChatBox';
+// Types for our modals
+type ProjectModalData = {
+  title: string;
+  description: string;
+  technologies: string[];
+  challenges: string;
+  solution: string;
+  results: string;
+  imageGradient: string;
+  year: string;
+};
+
+type BlogModalData = {
+  title: string;
+  date: string;
+  category: string;
+  content: string;
+  imageGradient: string;
+};
+
+const Portfolio: React.FC = () => {
+  const [activeSection, setActiveSection] = useState<string>('home');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  
+  // Modal states
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState<boolean>(false);
+  const [isBlogModalOpen, setIsBlogModalOpen] = useState<boolean>(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState<boolean>(false);
+  const [projectModalData, setProjectModalData] = useState<ProjectModalData | null>(null);
+  const [blogModalData, setBlogModalData] = useState<BlogModalData | null>(null);
+  
+  // Sample project data
+  const projectsData: ProjectModalData[] = [
+    {
+      title: "Network Traffic Predictor",
+      description: "An advanced machine learning system designed to analyze network traffic patterns and predict future resource requirements.",
+      technologies: ["AWS SageMaker", "Python", "TensorFlow", "AWS Lambda", "CloudWatch"],
+      challenges: "The main challenge was processing high volumes of network data in real-time while maintaining prediction accuracy above 90%. Traditional methods often failed during traffic spikes, leading to resource allocation issues.",
+      solution: "Implemented a hybrid approach combining LSTM neural networks for time-series prediction with a Random Forest classifier to categorize traffic patterns. The system was deployed on AWS SageMaker, with Lambda functions handling automated resource scaling based on prediction outputs.",
+      results: "The solution achieved 94% prediction accuracy and reduced overall cloud resource costs by 23% through intelligent resource allocation. The system now handles over 10TB of traffic data monthly across distributed enterprise networks.",
+      imageGradient: "from-blue-600 to-indigo-800",
+      year: "2023"
+    },
+    {
+      title: "Diabetic Retinopathy Detection",
+      description: "A computer vision system that analyzes retinal images to detect early signs of diabetic retinopathy with clinical-grade accuracy.",
+      technologies: ["MATLAB", "AlexNet", "Transfer Learning", "Image Processing"],
+      challenges: "Diabetic retinopathy detection typically requires specialized ophthalmologists, making early screening difficult in many regions. Creating an automated system required handling image quality variations while maintaining high diagnostic accuracy.",
+      solution: "Leveraged transfer learning with AlexNet architecture, fine-tuned on a dataset of 10,000+ labeled retinal images. Implemented advanced image preprocessing to standardize input quality and enhance key diagnostic features.",
+      results: "The system achieved 98% accuracy in detecting diabetic retinopathy across 5 severity grades, comparable to expert ophthalmologists. The model now serves as a screening tool in 3 research hospitals, reducing diagnostic time from days to seconds.",
+      imageGradient: "from-purple-600 to-pink-500",
+      year: "2024"
+    },
+    {
+      title: "Cryptography Research Project",
+      description: "A Java-based encryption system implementing novel cryptographic techniques for secure message transmission.",
+      technologies: ["Java", "Cryptography", "Algorithm Design", "Security"],
+      challenges: "Developing an encryption system that balances security strength with computational efficiency, while implementing novel approaches to frequency analysis resistance.",
+      solution: "Created a multi-layered encryption algorithm using keyword-based letter shifting combined with a secondary transformation matrix. The decryption module employs intelligent frequency analysis and language pattern recognition to reconstruct keys.",
+      results: "The system demonstrates stronger resistance to standard cryptanalysis techniques than traditional single-substitution ciphers, with only a 12% performance overhead. The research findings were documented in an undergraduate paper presented at the regional computer science symposium.",
+      imageGradient: "from-green-600 to-teal-500",
+      year: "2022"
+    },
+    {
+      title: "Carpet Pattern Classifier",
+      description: "A computer vision system developed for Mohawk Industries to automatically classify carpet styles and patterns from images.",
+      technologies: ["PyTorch", "Computer Vision", "CNN", "OpenCV", "Data Pipeline"],
+      challenges: "Carpet pattern classification involves subtle texture differences and complex pattern variations across thousands of product lines. The system needed to work with varying image qualities and lighting conditions.",
+      solution: "Developed a specialized CNN architecture with enhanced texture-recognition layers. Created a comprehensive data pipeline that standardized images and augmented the training dataset to account for lighting and angle variations.",
+      results: "The final model achieved 95% classification accuracy across 120+ carpet styles and patterns. The system reduced manual classification time by 85% and is now integrated into Mohawk's inventory management system, processing thousands of images daily.",
+      imageGradient: "from-red-600 to-yellow-500",
+      year: "2024"
+    }
+  ];
+  
+  // Sample blog data
+  const blogsData: BlogModalData[] = [
+    {
+      title: "Transfer Learning Techniques for Computer Vision",
+      date: "Jan 15, 2025",
+      category: "Machine Learning",
+      content: `
+        <h2>Why Transfer Learning Matters in Computer Vision</h2>
+        <p>Transfer learning has revolutionized how we approach computer vision problems, especially when working with limited datasets. Rather than training models from scratch, we can leverage pre-trained models that have already learned fundamental image features from massive datasets like ImageNet.</p>
+        
+        <h2>Key Benefits of Transfer Learning</h2>
+        <p>The primary advantages of using transfer learning for computer vision tasks include:</p>
+        <ul>
+          <li><strong>Reduced Training Time:</strong> Pre-trained models already understand basic image features, so fine-tuning takes significantly less time than training from scratch.</li>
+          <li><strong>Less Data Required:</strong> You can achieve excellent results with far fewer training examples—sometimes just hundreds instead of thousands or millions.</li>
+          <li><strong>Better Performance:</strong> Starting with weights from a pre-trained model often leads to higher accuracy and faster convergence.</li>
+        </ul>
+        
+        <h2>Popular Transfer Learning Techniques</h2>
+        <p>When implementing transfer learning for computer vision, you typically have several approaches:</p>
+        
+        <h3>1. Feature Extraction</h3>
+        <p>In this approach, you use the pre-trained model as a fixed feature extractor. You remove the final classification layer and extract the output from the penultimate layer as features for your new classifier.</p>
+        <p>This works well when your new dataset is small or similar to the original dataset the model was trained on.</p>
+        
+        <h3>2. Fine-Tuning</h3>
+        <p>Here, you not only replace the classifier but also fine-tune some of the weights of the pre-trained model by continuing backpropagation. Usually, earlier layers (which learn more generic features) are frozen, while later layers (which learn more specific features) are fine-tuned.</p>
+        
+        <h3>3. Progressive Fine-Tuning</h3>
+        <p>This is a more nuanced approach where you gradually unfreeze layers from the top down as training progresses. This helps prevent catastrophic forgetting of the valuable features learned during pre-training.</p>
+        
+        <h2>Choosing the Right Pre-Trained Model</h2>
+        <p>The choice of pre-trained model depends on your specific needs:</p>
+        <ul>
+          <li><strong>ResNet:</strong> Good general-purpose feature extractor with variants of different depths (ResNet-50, ResNet-101, etc.)</li>
+          <li><strong>MobileNet:</strong> Optimized for mobile and edge devices</li>
+          <li><strong>EfficientNet:</strong> State-of-the-art performance with efficient scaling</li>
+          <li><strong>Vision Transformer (ViT):</strong> Transformer-based architecture showing promising results</li>
+        </ul>
+        
+        <h2>Case Study: Diabetic Retinopathy Detection</h2>
+        <p>In my work on diabetic retinopathy detection, I used transfer learning with AlexNet to classify retinal images. Despite having only 2,000 labeled images, we achieved 98% accuracy by:</p>
+        <ol>
+          <li>Using AlexNet pre-trained on ImageNet</li>
+          <li>Replacing the final fully connected layers</li>
+          <li>Fine-tuning the last few convolutional layers</li>
+          <li>Implementing data augmentation to artificially expand our limited dataset</li>
+        </ol>
+        
+        <h2>Best Practices for Transfer Learning in Computer Vision</h2>
+        <p>To get the most out of transfer learning for your computer vision projects:</p>
+        <ul>
+          <li>Match preprocessing techniques to those used for the pre-trained model</li>
+          <li>Start with a lower learning rate when fine-tuning</li>
+          <li>Use appropriate data augmentation techniques</li>
+          <li>Consider the similarity between your dataset and the pre-training dataset</li>
+          <li>Experiment with freezing different numbers of layers</li>
+        </ul>
+        
+        <h2>Conclusion</h2>
+        <p>Transfer learning is not just a technique but a fundamental paradigm shift in how we approach computer vision problems. By leveraging the knowledge embedded in pre-trained models, we can build highly accurate systems with limited data and computational resources.</p>
+        <p>As the field evolves, we're seeing more specialized pre-trained models for specific domains, making transfer learning even more powerful for specialized applications in healthcare, manufacturing, agriculture, and beyond.</p>
+      `,
+      imageGradient: "from-blue-600 to-purple-600"
+    },
+    {
+      title: "Optimizing ML Deployments on AWS SageMaker",
+      date: "Feb 2, 2025",
+      category: "AWS",
+      content: `
+        <h2>The Challenge of ML Model Deployment</h2>
+        <p>Deploying machine learning models to production environments presents unique challenges that go beyond the initial model development. From scaling issues to monitoring model drift, the operational aspects of ML can significantly impact both performance and cost.</p>
+        
+        <h2>Why AWS SageMaker for ML Deployments</h2>
+        <p>Amazon SageMaker provides a comprehensive platform for building, training, and deploying machine learning models at scale. Key advantages include:</p>
+        <ul>
+          <li>End-to-end ML workflow support</li>
+          <li>Built-in model optimization tools</li>
+          <li>Flexible deployment options</li>
+          <li>Automated scaling</li>
+          <li>Integration with the broader AWS ecosystem</li>
+        </ul>
+        
+        <h2>Optimizing Model Inference Performance</h2>
+        
+        <h3>Instance Selection Strategies</h3>
+        <p>One of the most impactful decisions for both performance and cost is selecting the right instance type:</p>
+        <ul>
+          <li><strong>CPU Instances (C5, M5):</strong> Cost-effective for traditional ML algorithms and preprocessing</li>
+          <li><strong>GPU Instances (G4, P3):</strong> Essential for deep learning model inference</li>
+          <li><strong>Inf1 Instances:</strong> Optimized for cost-effective deep learning inference using AWS Inferentia chips</li>
+        </ul>
+        <p>For my network traffic prediction system, we initially deployed on g4dn.xlarge instances but later switched to inf1.xlarge, reducing inference costs by 45% while maintaining performance.</p>
+        
+        <h3>Multi-Model Endpoints</h3>
+        <p>When deploying multiple related models, SageMaker's multi-model endpoints allow you to host several models on a single endpoint. This significantly reduces costs for applications that don't need all models to be constantly available at high capacity.</p>
+        
+        <h2>Optimizing for Cost Efficiency</h2>
+        
+        <h3>Autoscaling Configuration</h3>
+        <p>Properly configured autoscaling is crucial for balancing performance and cost:</p>
+        <ol>
+          <li>Set appropriate minimum and maximum instance counts</li>
+          <li>Choose the right scaling metric (typically InvocationsPerInstance)</li>
+          <li>Configure scale-in and scale-out cooldown periods to prevent thrashing</li>
+          <li>Use target tracking scaling based on expected traffic patterns</li>
+        </ol>
+        
+        <h3>Serverless Inference</h3>
+        <p>For workloads with unpredictable or intermittent traffic, SageMaker Serverless Inference automatically scales capacity based on traffic and eliminates the need to select instance types or manage scaling policies.</p>
+        
+        <h3>Batch Transform for Bulk Predictions</h3>
+        <p>For non-real-time predictions, Batch Transform jobs are significantly more cost-effective than maintaining always-on endpoints. We reduced costs by 75% by shifting our daily prediction workloads to scheduled batch jobs.</p>
+        
+        <h2>Deployment Architecture Best Practices</h2>
+        
+        <h3>Model Monitoring and Drift Detection</h3>
+        <p>Set up SageMaker Model Monitor to automatically detect:
+        <ul>
+          <li>Data quality issues in production inputs</li>
+          <li>Model drift as real-world data evolves</li>
+          <li>Bias introduction in production data</li>
+        </ul>
+        </p>
+        
+        <h3>Feature Store for Consistent Features</h3>
+        <p>Use SageMaker Feature Store to ensure consistency between training and inference feature engineering. This eliminates one of the most common sources of production ML issues.</p>
+        
+        <h3>Model A/B Testing with Production Variants</h3>
+        <p>When rolling out model updates, use production variants to gradually shift traffic from the existing model to the new version, monitoring performance metrics to ensure the new model performs as expected in production.</p>
+        
+        <h2>Containerization and CI/CD for ML</h2>
+        <p>Implement a robust CI/CD pipeline that automates:
+        <ul>
+          <li>Model retraining with new data</li>
+          <li>Performance validation against benchmarks</li>
+          <li>Deployment with automated rollbacks if performance degrades</li>
+        </ul>
+        </p>
+        
+        <h2>Conclusion: The Evolving ML Deployment Landscape</h2>
+        <p>AWS SageMaker continues to evolve with new capabilities like SageMaker Clarify for explainability, SageMaker Edge Manager for edge deployments, and SageMaker Neo for model optimization.</p>
+        <p>By following these best practices and leveraging SageMaker's managed infrastructure, you can focus on model quality and business outcomes rather than operational complexities.</p>
+      `,
+      imageGradient: "from-green-600 to-blue-600"
+    },
+    {
+      title: "Building Custom Loss Functions in PyTorch",
+      date: "Feb 20, 2025",
+      category: "PyTorch",
+      content: `
+        <h2>Beyond Standard Loss Functions</h2>
+        <p>While PyTorch provides many common loss functions like Cross Entropy Loss and Mean Squared Error, custom loss functions can be crucial for specialized tasks. They allow you to encode domain-specific knowledge and optimization objectives directly into your training process.</p>
+        
+        <h2>Why Create Custom Loss Functions?</h2>
+        <p>Standard loss functions may not capture the nuances of your specific problem:</p>
+        <ul>
+          <li>Class imbalance issues not addressed by standard losses</li>
+          <li>Domain-specific performance metrics that should guide training</li>
+          <li>Multi-objective optimization requirements</li>
+          <li>Special regularization needs</li>
+        </ul>
+        
+        <h2>Implementing Custom Losses in PyTorch</h2>
+        <p>Creating custom loss functions in PyTorch is straightforward thanks to its dynamic computational graph architecture.</p>
+        
+        <h3>Method 1: Function-Based Approach</h3>
+        <pre>
+def focal_loss(predictions, targets, alpha=0.25, gamma=2.0):
+    """
+    Focal Loss implementation for addressing class imbalance
+    """
+    BCE_loss = F.binary_cross_entropy_with_logits(
+        predictions, targets, reduction='none'
+    )
+    pt = torch.exp(-BCE_loss)  # prevents nans when probability 0
+    focal_loss = alpha * (1-pt)**gamma * BCE_loss
+    return focal_loss.mean()
+        </pre>
+        
+        <h3>Method 2: Class-Based Approach</h3>
+        <pre>
+class DiceLoss(nn.Module):
+    """
+    Dice Loss for image segmentation tasks
+    """
+    def __init__(self, smooth=1.0):
+        super(DiceLoss, self).__init__()
+        self.smooth = smooth
+        
+    def forward(self, predictions, targets):
+        # Flatten predictions and targets
+        predictions = predictions.view(-1)
+        targets = targets.view(-1)
+        
+        intersection = (predictions * targets).sum()
+        dice = (2. * intersection + self.smooth) / (
+            predictions.sum() + targets.sum() + self.smooth
+        )
+        return 1 - dice
+        </pre>
+        
+        <h2>Case Study: Custom Loss for Carpet Pattern Detection</h2>
+        <p>For my carpet pattern classifier at Mohawk Industries, I developed a custom loss function that combined:</p>
+        <ol>
+          <li>Cross entropy for basic classification</li>
+          <li>Structure-based regularization to account for pattern symmetry</li>
+          <li>Texture consistency penalties</li>
+        </ol>
+        
+        <pre>
+class CarpetPatternLoss(nn.Module):
+    def __init__(self, texture_weight=0.3, symmetry_weight=0.2):
+        super(CarpetPatternLoss, self).__init__()
+        self.ce_loss = nn.CrossEntropyLoss()
+        self.texture_weight = texture_weight
+        self.symmetry_weight = symmetry_weight
+        
+    def forward(self, predictions, targets, feature_maps):
+        # Base classification loss
+        ce = self.ce_loss(predictions, targets)
+        
+        # Texture consistency term
+        texture_loss = self.calculate_texture_consistency(feature_maps)
+        
+        # Symmetry regularization
+        symmetry_loss = self.calculate_symmetry_deviation(feature_maps)
+        
+        # Combined loss
+        total_loss = ce + (self.texture_weight * texture_loss) + \
+                     (self.symmetry_weight * symmetry_loss)
+        return total_loss
+        </pre>
+        
+        <p>This custom loss improved classification accuracy by 8% compared to standard cross entropy, particularly for patterns with subtle variations.</p>
+        
+        <h2>Advanced Techniques for Custom Losses</h2>
+        
+        <h3>Curriculum Learning with Dynamic Losses</h3>
+        <p>Implement losses that change during training to gradually increase difficulty:</p>
+        <pre>
+class CurriculumLoss(nn.Module):
+    def __init__(self, max_epochs):
+        super(CurriculumLoss, self).__init__()
+        self.max_epochs = max_epochs
+        
+    def forward(self, predictions, targets, epoch):
+        # Calculate difficulty factor based on current epoch
+        difficulty = min(1.0, epoch / (0.7 * self.max_epochs))
+        
+        # Apply weighted loss components based on difficulty
+        # ...
+        </pre>
+        
+        <h3>Adversarial Losses</h3>
+        <p>For generative models, adversarial losses pit a generator against a discriminator, pushing the generator to produce increasingly realistic outputs.</p>
+        
+        <h3>Perceptual Losses</h3>
+        <p>Using feature activations from pretrained networks (like VGG) to calculate losses that better align with human visual perception.</p>
+        
+        <h2>Debugging Custom Loss Functions</h2>
+        <p>Custom losses can introduce subtle bugs. Key debugging strategies include:</p>
+        <ul>
+          <li>Gradual implementation: Start with standard loss and add custom components incrementally</li>
+          <li>Gradient checking to verify backpropagation</li>
+          <li>Tracking loss components separately during training</li>
+          <li>Testing with simplified edge cases</li>
+        </ul>
+        
+        <h2>Conclusion</h2>
+        <p>Custom loss functions are powerful tools for incorporating domain knowledge into your neural networks. By moving beyond standard losses, you can address specific challenges in your datasets and significantly improve model performance.</p>
+        <p>The key is to ensure your custom loss function is differentiable, numerically stable, and correctly aligns with your ultimate performance metrics.</p>
+      `,
+      imageGradient: "from-yellow-500 to-red-600"
+    }
+  ];
+  
+  // Loading effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Animate on scroll functionality
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-fade-in');
+          entry.target.classList.remove('opacity-0');
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+      el.classList.add('opacity-0');
+      observer.observe(el);
+    });
+    
+    return () => observer.disconnect();
+  }, [isLoading]);
+  
+  // Smooth scrolling function
+  const scrollToSection = (sectionId: string) => {
+    setActiveSection(sectionId);
+    
+    const element = document.getElementById(sectionId);
+    if (element) {
+      // Calculate the navbar height to offset the scroll position
+      const navbarHeight = 80; // Approximate height of navbar
+      
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+  };
+  
+  // Open project modal
+  const openProjectModal = (project: ProjectModalData) => {
+    setProjectModalData(project);
+    setIsProjectModalOpen(true);
+    document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
+  };
+  
+  // Open blog modal
+  const openBlogModal = (blog: BlogModalData) => {
+    setBlogModalData(blog);
+    setIsBlogModalOpen(true);
+    document.body.style.overflow = 'hidden';
+  };
+  
+  // Close modals
+  const closeModals = () => {
+    setIsProjectModalOpen(false);
+    setIsBlogModalOpen(false);
+    setIsContactModalOpen(false);
+    document.body.style.overflow = 'auto'; // Re-enable scrolling
+  };
+  
+  // Loading screen
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-900">
+        <div className="text-center">
+          <div className="text-5xl font-bold text-blue-500 mb-4">JR</div>
+          <div className="relative w-64 h-2 bg-gray-700 rounded-full overflow-hidden">
+            <div className="absolute top-0 left-0 h-full bg-blue-500 animate-loading-bar" style={{width: '100%'}}></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="min-h-screen bg-gray-900 text-white">
+      {/* Particle background effect */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(37,99,235,0.1)_0,rgba(0,0,0,0)_70%)]"></div>
+      <AIChatBox />
+      </div>
+      
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 bg-gray-900 bg-opacity-90 z-50 border-b border-gray-800">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="text-2xl font-bold text-blue-500">Jose Rodriguez</div>
+            <div className="hidden md:flex space-x-8">
+              {['home', 'about', 'skills', 'projects', 'blog'].map((item) => (
+                <button 
+                  key={item}
+                  className={`relative px-1 py-2 transition-colors ${activeSection === item ? 'text-blue-400' : 'text-gray-300 hover:text-white'}`}
+                  onClick={() => scrollToSection(item)}
+                >
+                  {item.charAt(0).toUpperCase() + item.slice(1)}
+                  {activeSection === item && (
+                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-500"></span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="flex space-x-4">
+              <a href="https://github.com/genjose12345" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                <Github size={20} />
+              </a>
+              <a href="https://www.linkedin.com/in/jose-rodriguez-9a982b224/" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors">
+                <Linkedin size={20} />
+              </a>
+              <a href="mailto:genjose1231@gmail.com" className="text-gray-400 hover:text-white transition-colors">
+                <Mail size={20} />
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+      
+      {/* Hero Section */}
+      <section id="home" className="min-h-screen pt-32 pb-20 relative overflow-hidden">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="animate-on-scroll">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                <span className="block">Hi, I'm Jose Rodriguez</span>
+                <span className="text-blue-500 block mt-2">Machine Learning Engineer</span>
+              </h1>
+              <p className="text-gray-300 text-xl mb-8">Specializing in AI/ML systems with extensive experience in Python, TensorFlow, and AWS Cloud infrastructure.</p>
+              <div className="flex flex-wrap gap-4">
+                <button onClick={() => scrollToSection('projects')} className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-medium transition-colors flex items-center">
+                  View Projects <ArrowRight size={18} className="ml-2" />
+                </button>
+                <button onClick={() => scrollToSection('about')} className="border border-gray-600 hover:border-gray-400 px-6 py-3 rounded-lg font-medium transition-colors">
+                  About Me
+                </button>
+              </div>
+            </div>
+            <div className="relative animate-on-scroll">
+              <div className="relative z-10 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-2xl p-1">
+                <div className="bg-gray-900 rounded-2xl p-6">
+                  <pre className="text-sm text-gray-300 overflow-hidden">
+                    <code>
+                      <span className="text-pink-400">class</span> <span className="text-yellow-400">JoseRodriguez</span> <span className="text-pink-400">extends</span> <span className="text-yellow-400">Engineer</span> {'{'}
+                      <br />
+                      <br />
+                      {'  '}skills = [<span className="text-green-400">'Machine Learning'</span>, <span className="text-green-400">'Python'</span>, <span className="text-green-400">'AWS'</span>,
+                      <br />
+                      {'           '}<span className="text-green-400">'TensorFlow'</span>, <span className="text-green-400">'PyTorch'</span>, <span className="text-green-400">'React'</span>];
+                      <br />
+                      <br />
+                      {'  '}<span className="text-blue-400">constructor</span>() {'{'}
+                      <br />
+                      {'    '}super();
+                      <br />
+                      {'    '}this.education = <span className="text-green-400">'B.S. Computer Science'</span>;
+                      <br />
+                      {'    '}this.location = <span className="text-green-400">'Dalton, GA'</span>;
+                      <br />
+                      {'  '}{'}'};
+                      <br />
+                      <br />
+                      {'  '}<span className="text-blue-400">getCurrentFocus</span>() {'{'}
+                      <br />
+                      {'    '}<span className="text-pink-400">return</span> <span className="text-green-400">'Advanced ML models & Cloud Architecture'</span>;
+                      <br />
+                      {'  '}{'}'};
+                      <br />
+                      {'}'}
+                    </code>
+                  </pre>
+                </div>
+              </div>
+              <div className="absolute -bottom-6 -right-6 w-40 h-40 bg-blue-500 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
+              <div className="absolute -top-6 -left-6 w-40 h-40 bg-indigo-500 rounded-full filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
+            </div>
+          </div>
+          
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <ChevronDown size={24} className="text-gray-400" />
+          </div>
+        </div>
+      </section>
+      
+      {/* About Section */}
+      <section id="about" className="py-20 bg-gray-800">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-12 text-center animate-on-scroll">About Me</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="animate-on-scroll">
+              <p className="text-gray-300 mb-6">
+                I'm a Machine Learning Engineer and Computer Science student at Kennesaw State University with a passion for AI technology and cloud architecture. My journey in software development has focused on creating intelligent systems that solve real-world problems.
+              </p>
+              <p className="text-gray-300 mb-6">
+                With experience at Mohawk Industries developing computer vision models and building data pipelines, I've gained practical industry experience in the ML workflow from data preparation to model deployment.
+              </p>
+              <p className="text-gray-300">
+                I'm particularly interested in deep learning applications in computer vision and predictive analytics, with a focus on creating scalable ML systems using AWS cloud infrastructure.
+              </p>
+            </div>
+            <div className="animate-on-scroll space-y-6">
+              <div className="bg-gray-700 p-4 rounded-lg flex items-start">
+                <div className="p-3 bg-blue-500 rounded-lg mr-4">
+                  <Award size={20} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Education</h3>
+                  <p className="text-gray-300">BS in Computer Science at Kennesaw State University</p>
+                  <p className="text-gray-300">AS in Computer Science at Dalton State College</p>
+                </div>
+              </div>
+              <div className="bg-gray-700 p-4 rounded-lg flex items-start">
+                <div className="p-3 bg-blue-500 rounded-lg mr-4">
+                  <Code size={20} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Experience</h3>
+                  <p className="text-gray-300">Machine Learning Intern at Mohawk Industries</p>
+                  <p className="text-gray-300">IS/Developer Intern at Mohawk Industries</p>
+                </div>
+              </div>
+              <div className="bg-gray-700 p-4 rounded-lg flex items-start">
+                <div className="p-3 bg-blue-500 rounded-lg mr-4">
+                  <Database size={20} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Interests</h3>
+                  <p className="text-gray-300">Deep Learning, Computer Vision, Cloud Architecture, Distributed Systems</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Skills Section */}
+      <section id="skills" className="py-20">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-12 text-center animate-on-scroll">Skills & Expertise</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-blue-500 transition-colors animate-on-scroll">
+              <div className="bg-blue-500 bg-opacity-20 p-3 rounded-lg inline-block mb-4">
+                <Cpu size={24} className="text-blue-500" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Machine Learning</h3>
+              <p className="text-gray-400 mb-4">Deep expertise in developing and deploying ML models</p>
+              <div className="space-y-2">
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-300">TensorFlow</span>
+                  <span className="text-sm text-gray-400">90%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '90%' }}></div>
+                </div>
+                
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-300">PyTorch</span>
+                  <span className="text-sm text-gray-400">85%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '85%' }}></div>
+                </div>
+                
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-300">Scikit-Learn</span>
+                  <span className="text-sm text-gray-400">95%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: '95%' }}></div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-blue-500 transition-colors animate-on-scroll">
+              <div className="bg-indigo-500 bg-opacity-20 p-3 rounded-lg inline-block mb-4">
+                <Code size={24} className="text-indigo-500" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Programming</h3>
+              <p className="text-gray-400 mb-4">Strong foundation in multiple programming languages</p>
+              <div className="space-y-2">
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-300">Python</span>
+                  <span className="text-sm text-gray-400">95%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="bg-indigo-500 h-2 rounded-full" style={{ width: '95%' }}></div>
+                </div>
+                
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-300">Java</span>
+                  <span className="text-sm text-gray-400">85%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="bg-indigo-500 h-2 rounded-full" style={{ width: '85%' }}></div>
+                </div>
+                
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-300">MATLAB</span>
+                  <span className="text-sm text-gray-400">80%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="bg-indigo-500 h-2 rounded-full" style={{ width: '80%' }}></div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-blue-500 transition-colors animate-on-scroll">
+              <div className="bg-purple-500 bg-opacity-20 p-3 rounded-lg inline-block mb-4">
+                <Server size={24} className="text-purple-500" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">AWS Cloud</h3>
+              <p className="text-gray-400 mb-4">Experience with AWS services for ML deployments</p>
+              <div className="space-y-2">
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-300">SageMaker</span>
+                  <span className="text-sm text-gray-400">90%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="bg-purple-500 h-2 rounded-full" style={{ width: '90%' }}></div>
+                </div>
+                
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-300">Lambda & EC2</span>
+                  <span className="text-sm text-gray-400">85%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="bg-purple-500 h-2 rounded-full" style={{ width: '85%' }}></div>
+                </div>
+                
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-300">S3 & DynamoDB</span>
+                  <span className="text-sm text-gray-400">80%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="bg-purple-500 h-2 rounded-full" style={{ width: '80%' }}></div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-blue-500 transition-colors animate-on-scroll">
+              <div className="bg-green-500 bg-opacity-20 p-3 rounded-lg inline-block mb-4">
+                <Database size={24} className="text-green-500" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Data Science</h3>
+              <p className="text-gray-400 mb-4">Data processing and visualization expertise</p>
+              <div className="space-y-2">
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-300">Pandas & NumPy</span>
+                  <span className="text-sm text-gray-400">95%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="bg-green-500 h-2 rounded-full" style={{ width: '95%' }}></div>
+                </div>
+                
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-300">Matplotlib</span>
+                  <span className="text-sm text-gray-400">85%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="bg-green-500 h-2 rounded-full" style={{ width: '85%' }}></div>
+                </div>
+                
+                <div className="flex justify-between mb-1">
+                  <span className="text-sm text-gray-300">SQL</span>
+                  <span className="text-sm text-gray-400">80%</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div className="bg-green-500 h-2 rounded-full" style={{ width: '80%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Projects Section */}
+      <section id="projects" className="py-20 bg-gray-800">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-12 text-center animate-on-scroll">Featured Projects</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Project 1 */}
+            <div className="group bg-gray-900 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-all duration-300 animate-on-scroll">
+              <div className={`h-48 bg-gradient-to-r ${projectsData[0].imageGradient} relative overflow-hidden`}>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-4xl opacity-20 font-bold">ML</span>
+                </div>
+                <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-gray-900 to-transparent">
+                  <h3 className="text-xl font-bold">{projectsData[0].title}</h3>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {projectsData[0].technologies.slice(0, 3).map((tech, index) => (
+                    <span key={index} className="px-2 py-1 bg-blue-500 bg-opacity-20 text-blue-400 rounded text-xs">{tech}</span>
+                  ))}
+                </div>
+                <p className="text-gray-400 text-sm mb-4">
+                  {projectsData[0].description}
+                </p>
+                <div className="pt-4 border-t border-gray-700 flex justify-between items-center">
+                  <button 
+                    onClick={() => openProjectModal(projectsData[0])}
+                    className="text-blue-400 text-sm hover:text-blue-300 transition-colors flex items-center"
+                  >
+                    View Project <ArrowRight size={14} className="ml-1" />
+                  </button>
+                  <span className="text-gray-500 text-xs">{projectsData[0].year}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Project 2 */}
+            <div className="group bg-gray-900 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-all duration-300 animate-on-scroll">
+              <div className={`h-48 bg-gradient-to-r ${projectsData[1].imageGradient} relative overflow-hidden`}>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-4xl opacity-20 font-bold">AI</span>
+                </div>
+                <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-gray-900 to-transparent">
+                  <h3 className="text-xl font-bold">{projectsData[1].title}</h3>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {projectsData[1].technologies.slice(0, 3).map((tech, index) => (
+                    <span key={index} className="px-2 py-1 bg-purple-500 bg-opacity-20 text-purple-400 rounded text-xs">{tech}</span>
+                  ))}
+                </div>
+                <p className="text-gray-400 text-sm mb-4">
+                  {projectsData[1].description}
+                </p>
+                <div className="pt-4 border-t border-gray-700 flex justify-between items-center">
+                  <button 
+                    onClick={() => openProjectModal(projectsData[1])}
+                    className="text-purple-400 text-sm hover:text-purple-300 transition-colors flex items-center"
+                  >
+                    View Project <ArrowRight size={14} className="ml-1" />
+                  </button>
+                  <span className="text-gray-500 text-xs">{projectsData[1].year}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Project 3 */}
+            <div className="group bg-gray-900 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-all duration-300 animate-on-scroll">
+              <div className={`h-48 bg-gradient-to-r ${projectsData[2].imageGradient} relative overflow-hidden`}>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-4xl opacity-20 font-bold">CRYPTO</span>
+                </div>
+                <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-gray-900 to-transparent">
+                  <h3 className="text-xl font-bold">{projectsData[2].title}</h3>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {projectsData[2].technologies.slice(0, 3).map((tech, index) => (
+                    <span key={index} className="px-2 py-1 bg-green-500 bg-opacity-20 text-green-400 rounded text-xs">{tech}</span>
+                  ))}
+                </div>
+                <p className="text-gray-400 text-sm mb-4">
+                  {projectsData[2].description}
+                </p>
+                <div className="pt-4 border-t border-gray-700 flex justify-between items-center">
+                  <button 
+                    onClick={() => openProjectModal(projectsData[2])}
+                    className="text-green-400 text-sm hover:text-green-300 transition-colors flex items-center"
+                  >
+                    View Project <ArrowRight size={14} className="ml-1" />
+                  </button>
+                  <span className="text-gray-500 text-xs">{projectsData[2].year}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Project 4 - CV Model from internship */}
+            <div className="group bg-gray-900 rounded-xl overflow-hidden border border-gray-700 hover:border-blue-500 transition-all duration-300 animate-on-scroll">
+              <div className={`h-48 bg-gradient-to-r ${projectsData[3].imageGradient} relative overflow-hidden`}>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-4xl opacity-20 font-bold">CV</span>
+                </div>
+                <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-gray-900 to-transparent">
+                  <h3 className="text-xl font-bold">{projectsData[3].title}</h3>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {projectsData[3].technologies.slice(0, 3).map((tech, index) => (
+                    <span key={index} className="px-2 py-1 bg-red-500 bg-opacity-20 text-red-400 rounded text-xs">{tech}</span>
+                  ))}
+                </div>
+                <p className="text-gray-400 text-sm mb-4">
+                  {projectsData[3].description}
+                </p>
+                <div className="pt-4 border-t border-gray-700 flex justify-between items-center">
+                  <button 
+                    onClick={() => openProjectModal(projectsData[3])}
+                    className="text-red-400 text-sm hover:text-red-300 transition-colors flex items-center"
+                  >
+                    View Project <ArrowRight size={14} className="ml-1" />
+                  </button>
+                  <span className="text-gray-500 text-xs">{projectsData[3].year}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* View All Projects Button */}
+            <div className="md:col-span-2 lg:col-span-3 flex justify-center mt-8 animate-on-scroll">
+              <button className="border border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center">
+                View All Projects <ExternalLink size={18} className="ml-2" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Blog Section */}
+      <section id="blog" className="py-20">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-12 text-center animate-on-scroll">Latest Blog Posts</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {/* Blog Post 1 */}
+            <div className="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow animate-on-scroll">
+              <div className={`h-48 bg-gradient-to-br ${blogsData[0].imageGradient} relative`}>
+                <div className="absolute inset-0 flex items-center justify-center opacity-40">
+                  <div className="w-16 h-16 bg-white rounded-full"></div>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-xs text-gray-400">{blogsData[0].date}</span>
+                  <span className="px-2 py-1 bg-blue-500 bg-opacity-20 text-blue-400 rounded text-xs">{blogsData[0].category}</span>
+                </div>
+                <h3 className="text-xl font-bold mb-2">{blogsData[0].title}</h3>
+                <p className="text-gray-400 text-sm mb-4">
+                  An exploration of how transfer learning can dramatically improve computer vision model accuracy with limited training data.
+                </p>
+                <button 
+                  onClick={() => openBlogModal(blogsData[0])}
+                  className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors flex items-center"
+                >
+                  Read More <ArrowRight size={14} className="ml-1" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Blog Post 2 */}
+            <div className="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow animate-on-scroll">
+              <div className={`h-48 bg-gradient-to-br ${blogsData[1].imageGradient} relative`}>
+                <div className="absolute inset-0 flex items-center justify-center opacity-40">
+                  <div className="w-16 h-16 bg-white rounded-full"></div>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-xs text-gray-400">{blogsData[1].date}</span>
+                  <span className="px-2 py-1 bg-green-500 bg-opacity-20 text-green-400 rounded text-xs">{blogsData[1].category}</span>
+                </div>
+                <h3 className="text-xl font-bold mb-2">{blogsData[1].title}</h3>
+                <p className="text-gray-400 text-sm mb-4">
+                  Best practices for deploying scalable and cost-effective machine learning models on AWS SageMaker.
+                </p>
+                <button 
+                  onClick={() => openBlogModal(blogsData[1])}
+                  className="text-green-400 hover:text-green-300 text-sm font-medium transition-colors flex items-center"
+                >
+                  Read More <ArrowRight size={14} className="ml-1" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Blog Post 3 */}
+            <div className="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow animate-on-scroll">
+              <div className={`h-48 bg-gradient-to-br ${blogsData[2].imageGradient} relative`}>
+                <div className="absolute inset-0 flex items-center justify-center opacity-40">
+                  <div className="w-16 h-16 bg-white rounded-full"></div>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-xs text-gray-400">{blogsData[2].date}</span>
+                  <span className="px-2 py-1 bg-yellow-500 bg-opacity-20 text-yellow-400 rounded text-xs">{blogsData[2].category}</span>
+                </div>
+                <h3 className="text-xl font-bold mb-2">{blogsData[2].title}</h3>
+                <p className="text-gray-400 text-sm mb-4">
+                  A deep dive into creating and implementing custom loss functions to optimize neural networks for specific tasks.
+                </p>
+                <button 
+                  onClick={() => openBlogModal(blogsData[2])}
+                  className="text-yellow-400 hover:text-yellow-300 text-sm font-medium transition-colors flex items-center"
+                >
+                  Read More <ArrowRight size={14} className="ml-1" />
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Subscribe to Blog */}
+          <div className="bg-gray-800 p-8 rounded-xl border border-gray-700 animate-on-scroll">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Subscribe to My Blog</h3>
+                <p className="text-gray-400 mb-4">Get notified when I publish new articles on machine learning and AI technologies.</p>
+              </div>
+              <div>
+                <div className="flex">
+                  <input 
+                    type="email" 
+                    placeholder="Enter your email" 
+                    className="flex-grow bg-gray-700 border border-gray-600 rounded-l-lg px-4 py-2 text-gray-300 focus:outline-none focus:border-blue-500"
+                  />
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-lg transition-colors">
+                    Subscribe
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Contact Section (Footer) */}
+      <footer className="bg-gray-900 border-t border-gray-800 py-12">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Let's Connect</h2>
+              <p className="text-gray-400 mb-6">
+                I'm currently open to AI/ML engineering opportunities. Feel free to reach out!
+              </p>
+              <div className="flex space-x-4">
+                <a href="https://github.com/genjose12345" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors">
+                  <Github size={20} />
+                </a>
+                <a href="https://www.linkedin.com/in/jose-rodriguez-9a982b224/" target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors">
+                  <Linkedin size={20} />
+                </a>
+                <button 
+                  onClick={() => setIsContactModalOpen(true)}
+                  className="p-2 bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors"
+                >
+                  <Mail size={20} />
+                </button>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-lg font-bold text-blue-500">Jose Rodriguez</span>
+              <p className="text-gray-500 mt-2">Machine Learning Engineer</p>
+              <p className="text-gray-500">Dalton, GA</p>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
+            © {new Date().getFullYear()} Jose Rodriguez. All rights reserved.
+          </div>
+        </div>
+      </footer>
+      
+      {/* Floating Contact Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button 
+          onClick={() => setIsContactModalOpen(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-colors"
+        >
+          <Mail size={20} />
+        </button>
+      </div>
+      
+      {/* Project Modal */}
+      {isProjectModalOpen && projectModalData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black bg-opacity-75" onClick={closeModals}></div>
+          <div className="bg-gray-900 rounded-2xl overflow-hidden relative z-10 w-full max-w-4xl max-h-90vh">
+            <div className={`h-48 bg-gradient-to-r ${projectModalData.imageGradient} relative`}>
+              <div className="absolute top-4 right-4">
+                <button 
+                  onClick={closeModals}
+                  className="bg-gray-900 bg-opacity-50 hover:bg-opacity-75 p-2 rounded-full transition-colors"
+                >
+                  <X size={24} className="text-white" />
+                </button>
+              </div>
+              <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-gray-900 to-transparent">
+                <h2 className="text-3xl font-bold">{projectModalData.title}</h2>
+              </div>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-12rem)]">
+              <div className="flex flex-wrap gap-2 mb-6">
+                {projectModalData.technologies.map((tech, index) => (
+                  <span key={index} className="px-3 py-1 bg-blue-500 bg-opacity-10 text-blue-400 rounded-full text-sm">{tech}</span>
+                ))}
+              </div>
+              
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">Overview</h3>
+                <p className="text-gray-300 mb-4">{projectModalData.description}</p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                  <h3 className="text-xl font-semibold mb-4">Challenges</h3>
+                  <p className="text-gray-300">{projectModalData.challenges}</p>
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold mb-4">Solution</h3>
+                  <p className="text-gray-300">{projectModalData.solution}</p>
+                </div>
+              </div>
+              
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4">Results</h3>
+                <p className="text-gray-300">{projectModalData.results}</p>
+              </div>
+              
+              <div className="flex justify-between items-center pt-6 border-t border-gray-800">
+                <span className="text-gray-400">Completed: {projectModalData.year}</span>
+                <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+                  View Code Repository
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Blog Modal */}
+      {isBlogModalOpen && blogModalData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black bg-opacity-75" onClick={closeModals}></div>
+          <div className="bg-gray-900 rounded-2xl overflow-hidden relative z-10 w-full max-w-4xl max-h-90vh">
+            <div className={`h-48 bg-gradient-to-br ${blogModalData.imageGradient} relative`}>
+              <div className="absolute top-4 right-4">
+                <button 
+                  onClick={closeModals}
+                  className="bg-gray-900 bg-opacity-50 hover:bg-opacity-75 p-2 rounded-full transition-colors"
+                >
+                  <X size={24} className="text-white" />
+                </button>
+              </div>
+              <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-gray-900 to-transparent">
+                <div className="flex items-center space-x-2 mb-2">
+                  <span className="text-gray-300 text-sm">{blogModalData.date}</span>
+                  <span className="px-2 py-1 bg-blue-500 bg-opacity-20 text-blue-400 rounded text-xs">{blogModalData.category}</span>
+                </div>
+                <h2 className="text-3xl font-bold">{blogModalData.title}</h2>
+              </div>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-12rem)]">
+              <div 
+                className="text-gray-300 blog-content space-y-4"
+                dangerouslySetInnerHTML={{ __html: blogModalData.content }}
+              ></div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Contact Modal */}
+      {isContactModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black bg-opacity-75" onClick={closeModals}></div>
+          <div className="bg-gray-900 rounded-2xl overflow-hidden relative z-10 w-full max-w-md">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-800 p-6 relative">
+              <div className="absolute top-4 right-4">
+                <button 
+                  onClick={closeModals}
+                  className="bg-gray-900 bg-opacity-50 hover:bg-opacity-75 p-2 rounded-full transition-colors"
+                >
+                  <X size={20} className="text-white" />
+                </button>
+              </div>
+              <h2 className="text-2xl font-bold mb-1">Get In Touch</h2>
+              <p className="text-gray-200 text-sm opacity-80">I'd love to hear from you about opportunities, collaborations, or just to connect!</p>
+            </div>
+            <div className="p-6">
+              <form className="space-y-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-1">Name</label>
+                  <input 
+                    type="text" 
+                    id="name"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                    placeholder="Your name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                  <input 
+                    type="email" 
+                    id="email"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                    placeholder="your.email@example.com"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="subject" className="block text-sm font-medium text-gray-400 mb-1">Subject</label>
+                  <input 
+                    type="text" 
+                    id="subject"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                    placeholder="What's this about?"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-400 mb-1">Message</label>
+                  <textarea 
+                    id="message"
+                    rows={4}
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500 resize-none"
+                    placeholder="Your message here..."
+                  ></textarea>
+                </div>
+                <button 
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-3 font-medium transition-colors"
+                >
+                  Send Message
+                </button>
+              </form>
+              <div className="mt-6 pt-6 border-t border-gray-800 text-center text-sm text-gray-500">
+                Alternatively, you can email me directly at<br/>
+                <a href="mailto:genjose1231@gmail.com" className="text-blue-400 hover:text-blue-300">genjose1231@gmail.com</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom CSS for animations and blog content */}
+      <style>
+        {`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          
+          .animate-fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+          }
+          
+          @keyframes loadingBar {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(0); }
+          }
+          
+          .animate-loading-bar {
+            animation: loadingBar 1.5s ease-out forwards;
+          }
+          
+          .max-h-90vh {
+            max-height: 90vh;
+          }
+          
+          .blog-content h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            color: #f0f0f0;
+          }
+          
+          .blog-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: #e0e0e0;
+          }
+          
+          .blog-content p {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+          }
+          
+          .blog-content ul, .blog-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+          }
+          
+          .blog-content li {
+            margin-bottom: 0.5rem;
+          }
+          
+          .blog-content ul {
+            list-style-type: disc;
+          }
+          
+          .blog-content ol {
+            list-style-type: decimal;
+          }
+          
+          .blog-content pre {
+            background-color: #1a202c;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+          }
+        `}
+      </style>
+    </div>
+  );
+};
+
+export default Portfolio;

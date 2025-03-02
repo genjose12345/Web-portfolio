@@ -1,0 +1,905 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { MessageCircle, X, Minimize, Maximize, Send, RefreshCw } from 'lucide-react';
+
+type Message = {
+  sender: 'user' | 'ai';
+  text: string;
+  isGame?: boolean;
+  gameComponent?: React.ReactNode;
+};
+
+type GameState = {
+  type: 'none' | 'rps' | 'tictactoe' | 'pong';
+  data: any;
+};
+
+const AIChatBox: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [gameState, setGameState] = useState<GameState>({ type: 'none', data: null });
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Cool facts about AI and technology
+  const coolFacts = [
+    "The term 'Artificial Intelligence' was first coined in 1956 at the Dartmouth Conference.",
+    "The first neural network computer was called the SNARC and was built in 1951.",
+    "AI algorithms can now compose music that is indistinguishable from pieces written by human composers.",
+    "Facial recognition AI can identify individuals even with masks on, with up to 95% accuracy.",
+    "The AI in self-driving cars processes over 1GB of data per second.",
+    "AI can predict heart attacks and strokes more accurately than standard medical methods.",
+    "Deep Blue was the first computer to beat a world chess champion, Garry Kasparov, in 1997.",
+    "Machine learning models can now generate realistic images of people who don't exist.",
+    "AI assistants like Siri and Alexa use natural language processing to understand human speech.",
+    "AlphaGo, an AI developed by DeepMind, defeated the world champion at Go, a game with more possible positions than atoms in the universe.",
+    "AI systems are being used to help discover new drugs by predicting how different compounds will behave.",
+    "Recommendation systems like those used by Netflix and Spotify use AI to suggest content based on your preferences.",
+    "Some modern AI models have over 175 billion parameters, making them incredibly complex.",
+    "AI-powered drones are being used for everything from delivery services to search and rescue operations.",
+    "Machine learning can help detect cancer from medical scans with higher accuracy than some human doctors.",
+    "AI language models can now write code, stories, and even essays based on simple prompts.",
+    "Reinforcement learning, a type of AI, learns by trial and error, similar to how humans learn.",
+    "Computer vision can identify objects in images with greater than 99% accuracy in some cases.",
+    "AI can now generate photorealistic faces that are indistinguishable from real photographs.",
+    "Quantum computing could exponentially increase AI capabilities in the coming decades."
+  ];
+
+  // Initial greeting when chat is first opened
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      setTimeout(() => {
+        setMessages([
+          { 
+            sender: 'ai', 
+            text: "Hi there! I'm Jose's AI assistant. I can share random facts about AI or we can play some games! Try asking me for a 'fun fact' or type 'play games' to see what games we can play!" 
+          }
+        ]);
+      }, 500);
+    }
+  }, [isOpen, messages.length]);
+
+  // Auto-scroll to bottom of messages
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
+  // Handle toggle chat open/closed
+  const toggleChat = () => {
+    setIsOpen(!isOpen);
+    setIsMinimized(false);
+  };
+
+  // Handle toggle minimize/maximize
+  const toggleMinimize = () => {
+    setIsMinimized(!isMinimized);
+  };
+
+  // Get a random fact
+  const getRandomFact = () => {
+    const randomIndex = Math.floor(Math.random() * coolFacts.length);
+    return coolFacts[randomIndex];
+  };
+
+  // Process user input and generate response
+  const handleSendMessage = () => {
+    if (inputValue.trim() === '') return;
+    
+    // Add user message
+    const userMessage: Message = { sender: 'user', text: inputValue };
+    setMessages(prev => [...prev, userMessage]);
+    
+    // Process the message and generate a response
+    const userInput = inputValue.toLowerCase();
+    setInputValue('');
+    
+    // Determine the AI response based on user input
+    setTimeout(() => {
+      let aiResponse: Message = { sender: 'ai', text: '' };
+      
+      // Check if we're in a game state
+      if (gameState.type !== 'none') {
+        if (userInput === 'quit' || userInput === 'exit') {
+          setGameState({ type: 'none', data: null });
+          aiResponse.text = "Game ended! What would you like to do next?";
+        } else {
+          // Handle game-specific input
+          switch (gameState.type) {
+            case 'rps':
+              handleRockPaperScissors(userInput);
+              return;
+            case 'tictactoe':
+              // Tic-tac-toe input is handled by the component
+              return;
+            case 'pong':
+              // Pong is controlled by the component
+              return;
+          }
+        }
+      } else if (userInput.includes('fact') || userInput.includes('tell me something')) {
+        aiResponse.text = getRandomFact();
+      } else if (userInput.includes('play') || userInput.includes('game')) {
+        aiResponse.text = "I can play Rock Paper Scissors, Tic-tac-toe, or Pong! Type 'play rps', 'play tic-tac-toe', or 'play pong' to start a game.";
+      } else if (userInput.includes('rock') || userInput.includes('paper') || userInput.includes('scissors')) {
+        startRockPaperScissors();
+        return;
+      } else if (userInput.includes('play rps')) {
+        startRockPaperScissors();
+        return;
+      } else if (userInput.includes('play tic') || userInput.includes('tictactoe') || userInput.includes('tic-tac-toe')) {
+        startTicTacToe();
+        return;
+      } else if (userInput.includes('play pong')) {
+        startPong();
+        return;
+      } else if (userInput.includes('hello') || userInput.includes('hi')) {
+        aiResponse.text = "Hello! How can I help you today?";
+      } else if (userInput.includes('who are you')) {
+        aiResponse.text = "I'm an AI assistant created to showcase Jose's programming skills! I can share interesting facts and play games.";
+      } else if (userInput.includes('help')) {
+        aiResponse.text = "I can share random facts about AI (just ask for a 'fact') or we can play games! Try 'play rps', 'play tic-tac-toe', or 'play pong'.";
+      } else if (userInput.includes('thank')) {
+        aiResponse.text = "You're welcome! Anything else you'd like to know or do?";
+      } else if (userInput.includes('bye') || userInput.includes('goodbye')) {
+        aiResponse.text = "Goodbye! Feel free to chat again later!";
+      } else {
+        aiResponse.text = "I'm not sure how to respond to that. Try asking for a 'fact' or type 'play games' to see what games we can play!";
+      }
+      
+      setMessages(prev => [...prev, aiResponse]);
+    }, 500);
+  };
+
+  // Handle Enter key in input
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  };
+
+  // Game: Rock Paper Scissors
+  const startRockPaperScissors = () => {
+    setGameState({ type: 'rps', data: { userWins: 0, aiWins: 0, ties: 0 } });
+    const aiResponse: Message = { 
+      sender: 'ai', 
+      text: "Let's play Rock Paper Scissors! Type 'rock', 'paper', or 'scissors' to play. Best of 5 wins! Type 'quit' to exit.",
+      isGame: true,
+      gameComponent: (
+        <div className="game-container my-2 p-3 bg-gray-800 rounded-lg">
+          <h3 className="text-center text-lg font-bold mb-2">Rock Paper Scissors</h3>
+          <div className="flex justify-center space-x-4">
+            <button 
+              className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              onClick={() => handleRPSChoice('rock')}
+            >
+              Rock
+            </button>
+            <button 
+              className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              onClick={() => handleRPSChoice('paper')}
+            >
+              Paper
+            </button>
+            <button 
+              className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              onClick={() => handleRPSChoice('scissors')}
+            >
+              Scissors
+            </button>
+          </div>
+        </div>
+      )
+    };
+    setMessages(prev => [...prev, aiResponse]);
+  };
+
+  const handleRPSChoice = (userChoice: string) => {
+    playRPSRound(userChoice);
+  };
+
+  const handleRockPaperScissors = (userInput: string) => {
+    const choice = userInput.trim().toLowerCase();
+    if (['rock', 'paper', 'scissors'].includes(choice)) {
+      playRPSRound(choice);
+    } else {
+      const aiResponse: Message = { 
+        sender: 'ai', 
+        text: "Please choose 'rock', 'paper', or 'scissors', or type 'quit' to exit."
+      };
+      setMessages(prev => [...prev, aiResponse]);
+    }
+  };
+
+  const playRPSRound = (userChoice: string) => {
+    const choices = ['rock', 'paper', 'scissors'];
+    const aiChoice = choices[Math.floor(Math.random() * 3)];
+    
+    let result: string;
+    let gameData = { ...gameState.data };
+    
+    // Determine the winner
+    if (userChoice === aiChoice) {
+      result = "It's a tie!";
+      gameData.ties += 1;
+    } else if (
+      (userChoice === 'rock' && aiChoice === 'scissors') ||
+      (userChoice === 'paper' && aiChoice === 'rock') ||
+      (userChoice === 'scissors' && aiChoice === 'paper')
+    ) {
+      result = "You win!";
+      gameData.userWins += 1;
+    } else {
+      result = "I win!";
+      gameData.aiWins += 1;
+    }
+    
+    // Create message with result
+    const userMessage: Message = { sender: 'user', text: `You chose: ${userChoice}` };
+    const aiResponse: Message = { 
+      sender: 'ai', 
+      text: `I chose: ${aiChoice}. ${result}\nScore: You ${gameData.userWins} - Me ${gameData.aiWins} - Ties ${gameData.ties}`
+    };
+    
+    setMessages(prev => [...prev, userMessage, aiResponse]);
+    setGameState({ type: 'rps', data: gameData });
+    
+    // Check if the game is over (best of 5)
+    if (gameData.userWins >= 3) {
+      const gameOverMessage: Message = { 
+        sender: 'ai', 
+        text: "Game over! You won the best of 5! 🎉 Type 'play rps' to play again or try another game."
+      };
+      setMessages(prev => [...prev, gameOverMessage]);
+      setGameState({ type: 'none', data: null });
+    } else if (gameData.aiWins >= 3) {
+      const gameOverMessage: Message = { 
+        sender: 'ai', 
+        text: "Game over! I won the best of 5! Better luck next time. Type 'play rps' to play again or try another game."
+      };
+      setMessages(prev => [...prev, gameOverMessage]);
+      setGameState({ type: 'none', data: null });
+    }
+  };
+
+  // Game: Tic-tac-toe
+  const startTicTacToe = () => {
+    const initialBoard = Array(9).fill(null);
+    setGameState({ 
+      type: 'tictactoe', 
+      data: { 
+        board: initialBoard,
+        playerTurn: true,
+        gameOver: false,
+        winner: null
+      } 
+    });
+    
+    const aiResponse: Message = { 
+      sender: 'ai', 
+      text: "Let's play Tic-tac-toe! You're X, I'm O. Click on a square to make your move. Type 'quit' to exit.",
+      isGame: true,
+      gameComponent: <TicTacToeGame gameState={gameState} setGameState={setGameState} setMessages={setMessages} />
+    };
+    
+    setMessages(prev => [...prev, aiResponse]);
+  };
+
+  // Game: Pong
+  const startPong = () => {
+    setGameState({ 
+      type: 'pong', 
+      data: { 
+        playerScore: 0,
+        aiScore: 0,
+        gameStarted: false
+      } 
+    });
+    
+    const aiResponse: Message = { 
+      sender: 'ai', 
+      text: "Let's play Pong! Use your mouse or touch to move the paddle. First to 5 points wins! Type 'quit' to exit.",
+      isGame: true,
+      gameComponent: <PongGame gameState={gameState} setGameState={setGameState} setMessages={setMessages} />
+    };
+    
+    setMessages(prev => [...prev, aiResponse]);
+  };
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+      {/* Chat window */}
+      {isOpen && (
+        <div 
+          className={`bg-gray-900 border border-gray-700 rounded-lg shadow-xl mb-4 transition-all duration-300 overflow-hidden flex flex-col ${
+            isMinimized ? 'w-72 h-12' : 'w-80 sm:w-96 h-96'
+          }`}
+        >
+          {/* Chat header */}
+          <div className="bg-gray-800 p-3 flex justify-between items-center border-b border-gray-700">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              <h3 className="font-medium text-white">AI Assistant</h3>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={toggleMinimize}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                {isMinimized ? <Maximize size={16} /> : <Minimize size={16} />}
+              </button>
+              <button 
+                onClick={toggleChat}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+          
+          {/* Chat messages */}
+          {!isMinimized && (
+            <>
+              <div className="flex-1 p-4 overflow-y-auto">
+                {messages.map((message, index) => (
+                  <div key={index} className={`mb-3 ${message.sender === 'user' ? 'text-right' : ''}`}>
+                    <div
+                      className={`inline-block px-3 py-2 rounded-lg ${
+                        message.sender === 'user'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-800 text-gray-200'
+                      }`}
+                    >
+                      {message.text}
+                    </div>
+                    {message.isGame && message.gameComponent && (
+                      <div className="mt-2">{message.gameComponent}</div>
+                    )}
+                  </div>
+                ))}
+                <div ref={messagesEndRef}></div>
+              </div>
+              
+              {/* Chat input */}
+              <div className="p-3 border-t border-gray-700 bg-gray-800">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Type a message..."
+                    className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors"
+                  >
+                    <Send size={18} />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+      
+      {/* Chat button */}
+      <button
+        onClick={toggleChat}
+        className={`bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-colors flex items-center justify-center ${
+          isOpen ? 'rotate-90 transform' : ''
+        }`}
+      >
+        {isOpen ? <X size={20} /> : <MessageCircle size={20} />}
+      </button>
+    </div>
+  );
+};
+
+// Tic-tac-toe Game Component
+interface TicTacToeProps {
+  gameState: GameState;
+  setGameState: React.Dispatch<React.SetStateAction<GameState>>;
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+}
+
+const TicTacToeGame: React.FC<TicTacToeProps> = ({ gameState, setGameState, setMessages }) => {
+  const renderSquare = (index: number) => {
+    const { board, playerTurn, gameOver } = gameState.data;
+    
+    return (
+      <button
+        className="w-14 h-14 bg-gray-700 border border-gray-600 flex items-center justify-center text-2xl font-bold text-white hover:bg-gray-600 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        onClick={() => handleClick(index)}
+        disabled={board[index] !== null || !playerTurn || gameOver}
+      >
+        {board[index]}
+      </button>
+    );
+  };
+
+  const handleClick = (index: number) => {
+    const boardCopy = [...gameState.data.board];
+    if (boardCopy[index] || gameState.data.gameOver) return;
+    
+    // Player move
+    boardCopy[index] = 'X';
+    
+    const updatedState = {
+      ...gameState.data,
+      board: boardCopy,
+      playerTurn: false
+    };
+    
+    // Check for winner after player move
+    const winner = calculateWinner(boardCopy);
+    if (winner) {
+      setGameState({
+        type: 'tictactoe',
+        data: {
+          ...updatedState,
+          gameOver: true,
+          winner
+        }
+      });
+      
+      const message = winner === 'X' 
+        ? "You won! Congratulations! 🎉" 
+        : winner === 'O' 
+          ? "I won this time!" 
+          : "It's a draw!";
+      
+      setTimeout(() => {
+        setMessages(prev => [...prev, { sender: 'ai', text: message }]);
+      }, 500);
+      
+      return;
+    }
+    
+    setGameState({
+      type: 'tictactoe',
+      data: updatedState
+    });
+    
+    // AI move
+    setTimeout(() => {
+      const aiBoard = [...boardCopy];
+      const aiMove = getAIMove(aiBoard);
+      
+      if (aiMove !== -1) {
+        aiBoard[aiMove] = 'O';
+        
+        // Check for winner after AI move
+        const winner = calculateWinner(aiBoard);
+        if (winner) {
+          setGameState({
+            type: 'tictactoe',
+            data: {
+              board: aiBoard,
+              playerTurn: true,
+              gameOver: true,
+              winner
+            }
+          });
+          
+          const message = winner === 'X' 
+            ? "You won! Congratulations! 🎉" 
+            : winner === 'O' 
+              ? "I won this time!" 
+              : "It's a draw!";
+          
+          setTimeout(() => {
+            setMessages(prev => [...prev, { sender: 'ai', text: message }]);
+          }, 500);
+          
+          return;
+        }
+        
+        setGameState({
+          type: 'tictactoe',
+          data: {
+            board: aiBoard,
+            playerTurn: true,
+            gameOver: false,
+            winner: null
+          }
+        });
+      }
+    }, 500);
+  };
+
+  const getAIMove = (board: Array<string | null>): number => {
+    // First check if AI can win
+    for (let i = 0; i < 9; i++) {
+      if (!board[i]) {
+        const boardCopy = [...board];
+        boardCopy[i] = 'O';
+        if (calculateWinner(boardCopy) === 'O') {
+          return i;
+        }
+      }
+    }
+    
+    // Then check if player can win and block
+    for (let i = 0; i < 9; i++) {
+      if (!board[i]) {
+        const boardCopy = [...board];
+        boardCopy[i] = 'X';
+        if (calculateWinner(boardCopy) === 'X') {
+          return i;
+        }
+      }
+    }
+    
+    // Take center if available
+    if (!board[4]) return 4;
+    
+    // Take corners if available
+    const corners = [0, 2, 6, 8];
+    const availableCorners = corners.filter(i => !board[i]);
+    if (availableCorners.length > 0) {
+      return availableCorners[Math.floor(Math.random() * availableCorners.length)];
+    }
+    
+    // Take any available space
+    const availableSpaces = board.map((square, i) => square === null ? i : -1).filter(i => i !== -1);
+    if (availableSpaces.length > 0) {
+      return availableSpaces[Math.floor(Math.random() * availableSpaces.length)];
+    }
+    
+    return -1;
+  };
+
+  const calculateWinner = (board: Array<string | null>): string | null => {
+    const lines = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const [a, b, c] = lines[i];
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+        return board[a] as string;
+      }
+    }
+    
+    // Check for draw
+    if (!board.includes(null)) {
+      return 'draw';
+    }
+    
+    return null;
+  };
+
+  const resetGame = () => {
+    setGameState({
+      type: 'tictactoe',
+      data: {
+        board: Array(9).fill(null),
+        playerTurn: true,
+        gameOver: false,
+        winner: null
+      }
+    });
+  };
+
+  return (
+    <div className="game-container p-3 bg-gray-800 rounded-lg flex flex-col items-center">
+      <h3 className="text-center text-lg font-bold mb-3">Tic-tac-toe</h3>
+      
+      <div className="mb-3">
+        <div className="grid grid-cols-3 gap-1">
+          {renderSquare(0)}
+          {renderSquare(1)}
+          {renderSquare(2)}
+          {renderSquare(3)}
+          {renderSquare(4)}
+          {renderSquare(5)}
+          {renderSquare(6)}
+          {renderSquare(7)}
+          {renderSquare(8)}
+        </div>
+      </div>
+      
+      <div className="text-center mb-2">
+        {gameState.data.gameOver ? (
+          <div className="text-sm">
+            {gameState.data.winner === 'X' && "You won! 🎉"}
+            {gameState.data.winner === 'O' && "I won! Better luck next time."}
+            {gameState.data.winner === 'draw' && "It's a draw!"}
+          </div>
+        ) : (
+          <div className="text-sm">
+            {gameState.data.playerTurn ? "Your turn (X)" : "My turn (O)..."}
+          </div>
+        )}
+      </div>
+      
+      {gameState.data.gameOver && (
+        <button
+          onClick={resetGame}
+          className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded-lg text-sm flex items-center"
+        >
+          <RefreshCw size={14} className="mr-1" /> Play Again
+        </button>
+      )}
+    </div>
+  );
+};
+
+// Pong Game Component
+interface PongProps {
+  gameState: GameState;
+  setGameState: React.Dispatch<React.SetStateAction<GameState>>;
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+}
+
+const PongGame: React.FC<PongProps> = ({ gameState, setGameState, setMessages }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [gameLoop, setGameLoop] = useState<number | null>(null);
+  
+  // Game state
+  const [paddle, setPaddle] = useState({ x: 175, y: 280, width: 50, height: 10 });
+  const [ball, setBall] = useState({ x: 200, y: 150, dx: 2, dy: 3, radius: 5 });
+  const [aiPaddle, setAiPaddle] = useState({ x: 175, y: 10, width: 50, height: 10 });
+  
+  // Start the game
+  const startGame = () => {
+    if (gameState.data.gameStarted) return;
+    
+    setGameState({
+      ...gameState,
+      data: {
+        ...gameState.data,
+        gameStarted: true
+      }
+    });
+    
+    const loop = window.setInterval(() => {
+      updateGameState();
+    }, 16); // Approximately 60fps
+    
+    setGameLoop(loop);
+  };
+  
+  // Update game state
+  const updateGameState = () => {
+    if (!canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Update ball position
+    let newBall = { ...ball };
+    newBall.x += newBall.dx;
+    newBall.y += newBall.dy;
+    
+    // Check for wall collisions
+    if (newBall.x + newBall.radius > canvas.width || newBall.x - newBall.radius < 0) {
+      newBall.dx = -newBall.dx;
+    }
+    
+    // Check for paddle collisions
+    if (
+      newBall.y + newBall.radius > paddle.y &&
+      newBall.x > paddle.x &&
+      newBall.x < paddle.x + paddle.width
+    ) {
+      newBall.dy = -Math.abs(newBall.dy); // Ensure ball goes up
+    }
+    
+    if (
+      newBall.y - newBall.radius < aiPaddle.y + aiPaddle.height &&
+      newBall.x > aiPaddle.x &&
+      newBall.x < aiPaddle.x + aiPaddle.width
+    ) {
+      newBall.dy = Math.abs(newBall.dy); // Ensure ball goes down
+    }
+    
+    // Move AI paddle (simple AI that follows the ball)
+    let newAiPaddle = { ...aiPaddle };
+    const aiTarget = newBall.x - aiPaddle.width / 2;
+    // Add some challenge by limiting AI paddle speed and adding slight delay
+    newAiPaddle.x += (aiTarget - aiPaddle.x) * 0.1;
+    
+    // Constrain AI paddle to canvas
+    if (newAiPaddle.x < 0) newAiPaddle.x = 0;
+    if (newAiPaddle.x + newAiPaddle.width > canvas.width) {
+      newAiPaddle.x = canvas.width - newAiPaddle.width;
+    }
+    
+    // Check for scoring
+    let { playerScore, aiScore } = gameState.data;
+    
+    // Ball goes beyond bottom edge
+    if (newBall.y - newBall.radius > canvas.height) {
+      aiScore += 1;
+      // Reset ball
+      newBall = { ...ball, x: 200, y: 150, dx: 2, dy: 3 };
+      
+      setGameState({
+        ...gameState,
+        data: {
+          ...gameState.data,
+          aiScore
+        }
+      });
+    }
+    
+    // Ball goes beyond top edge
+    if (newBall.y + newBall.radius < 0) {
+      playerScore += 1;
+      // Reset ball
+      newBall = { ...ball, x: 200, y: 150, dx: 2, dy: -3 };
+      
+      setGameState({
+        ...gameState,
+        data: {
+          ...gameState.data,
+          playerScore
+        }
+      });
+    }
+    
+    // Check for game over
+    if (playerScore >= 5 || aiScore >= 5) {
+      if (gameLoop) clearInterval(gameLoop);
+      setGameLoop(null);
+      
+      setGameState({
+        ...gameState,
+        data: {
+          ...gameState.data,
+          gameStarted: false
+        }
+      });
+      
+      const message = playerScore >= 5 
+        ? "You won the Pong match! 🎉" 
+        : "I won the Pong match! Better luck next time.";
+      
+      setTimeout(() => {
+        setMessages(prev => [...prev, { sender: 'ai', text: message }]);
+      }, 500);
+      
+      return;
+    }
+    
+    // Draw everything
+    
+    // Draw ball
+    ctx.beginPath();
+    ctx.arc(newBall.x, newBall.y, newBall.radius, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fill();
+    ctx.closePath();
+    
+    // Draw player paddle
+    ctx.beginPath();
+    ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+    ctx.fillStyle = '#3B82F6'; // Blue color
+    ctx.fill();
+    ctx.closePath();
+    
+    // Draw AI paddle
+    ctx.beginPath();
+    ctx.rect(newAiPaddle.x, newAiPaddle.y, newAiPaddle.width, newAiPaddle.height);
+    ctx.fillStyle = '#EF4444'; // Red color
+    ctx.fill();
+    ctx.closePath();
+    
+    // Draw center line
+    ctx.beginPath();
+    ctx.setLineDash([5, 5]);
+    ctx.moveTo(0, canvas.height / 2);
+    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.closePath();
+    
+    // Draw score
+    ctx.font = '16px Arial';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${playerScore} - ${aiScore}`, canvas.width / 2, canvas.height / 2 + 20);
+    
+    // Update state
+    setBall(newBall);
+    setAiPaddle(newAiPaddle);
+  };
+  
+  // Handle mouse movement
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!canvasRef.current || !gameState.data.gameStarted) return;
+    
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    
+    setPaddle(prevPaddle => ({
+      ...prevPaddle,
+      x: Math.max(0, Math.min(canvas.width - prevPaddle.width, mouseX - prevPaddle.width / 2))
+    }));
+  };
+  
+  // Cleanup game loop on unmount
+  useEffect(() => {
+    return () => {
+      if (gameLoop) clearInterval(gameLoop);
+    };
+  }, [gameLoop]);
+  
+  // Reset game
+  const resetGame = () => {
+    if (gameLoop) clearInterval(gameLoop);
+    setGameLoop(null);
+    
+    setBall({ x: 200, y: 150, dx: 2, dy: 3, radius: 5 });
+    setPaddle({ x: 175, y: 280, width: 50, height: 10 });
+    setAiPaddle({ x: 175, y: 10, width: 50, height: 10 });
+    
+    setGameState({
+      ...gameState,
+      data: {
+        playerScore: 0,
+        aiScore: 0,
+        gameStarted: false
+      }
+    });
+  };
+  
+  return (
+    <div className="game-container p-3 bg-gray-800 rounded-lg flex flex-col items-center">
+      <h3 className="text-center text-lg font-bold mb-2">Pong</h3>
+      
+      <canvas
+        ref={canvasRef}
+        width={400}
+        height={300}
+        className="bg-gray-900 border border-gray-700 rounded-lg cursor-pointer"
+        onMouseMove={handleMouseMove}
+      />
+      
+      <div className="mt-3 flex justify-center space-x-3">
+        {!gameState.data.gameStarted ? (
+          <button
+            onClick={startGame}
+            className="bg-green-600 hover:bg-green-700 text-white py-1 px-4 rounded-lg text-sm"
+          >
+            Start Game
+          </button>
+        ) : (
+          <div className="text-center text-sm text-gray-300">
+            Move your mouse to control the paddle
+          </div>
+        )}
+        
+        <button
+          onClick={resetGame}
+          className="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded-lg text-sm flex items-center"
+        >
+          <RefreshCw size={14} className="mr-1" /> Reset
+        </button>
+      </div>
+      
+      <div className="mt-2 text-xs text-gray-400 text-center">
+        First to 5 points wins!
+      </div>
+    </div>
+  );
+};
+
+export default AIChatBox;

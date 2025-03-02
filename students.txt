@@ -1,0 +1,2 @@
+John_Doe 100000001 0.92 undergrad senior
+Jane_Smith 999999999 3.99 grad Albert_Einstein
