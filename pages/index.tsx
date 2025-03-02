@@ -21,6 +21,7 @@ type BlogModalData = {
   category: string;
   content: string;
   imageGradient: string;
+  description?: string; // Added optional description property
 };
 
 type TimelineItemData = {
