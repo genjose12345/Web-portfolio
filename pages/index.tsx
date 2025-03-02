@@ -1013,7 +1013,7 @@ class CurriculumLoss(nn.Module):
                   </div>
                   <h3 className="text-xl font-bold mb-2">{blog.title}</h3>
                   <p className="text-gray-400 text-sm mb-4">
-                    {blog.description || "An exploration of advanced techniques and best practices..."}
+                    {blog.description ?? "An exploration of advanced techniques and best practices..."}
                   </p>
                   <button 
                     className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors flex items-center"
