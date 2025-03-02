@@ -20,6 +20,7 @@ type BlogModalData = {
   date: string;
   category: string;
   content: string;
+  description?: string;
   imageGradient: string;
 };
 
